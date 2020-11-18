@@ -1,10 +1,10 @@
 # Client Certificate Authentication with Spring Boot
 
-This repository contains a demo on how to implement mutual TLS (MTLS) using Spring Boot and Spring Security.
-To show this a simple Spring MVC Rest API is implemented that:
+This repository contains a demo on how to implement mutual TLS (_MTLS_) using Spring Boot and Spring Security.
+For demonstration purposes the included application implements a simple Spring MVC Rest API:
 
-* is using a HTTPS connection (server is authenticated by the client)
-* requires a client certificate to authenticate (client is authenticated by the server)
+* The app is connecting using an HTTPS connection (server authenticates to the client)
+* It requires a client certificate to authenticate (client authenticates to the server)
 
 The Rest API provides just one endpoint: ```https://localhost:8443/api``` 
 that returns the value ```it works for [current_user]``` with _current_user_ being replaced by the
@@ -22,7 +22,7 @@ For this tutorial you need the following requirements:
 * [Keystore Explorer](https://keystore-explorer.org/) to manage keystore contents. To install it just 
   go to the [Keystore Downloads](https://keystore-explorer.org/downloads.html) page and get the appropriate
   installer for your operating system  
-* [httpie](https://httpie.org/), [Curl](https://curl.haxx.se/) or [Postman](https://www.postman.com/) to access the 
+* [Curl](https://curl.haxx.se/) or [Postman](https://www.postman.com/) to access the 
 server api using a command line or UI client. 
   
 ## Getting started
@@ -87,12 +87,12 @@ This file contains the client certificate including the private/public key pair.
 To authenticate your web browser for our Spring Boot server application just import
 the file _myuser-client.p12_ into the browsers certificate store.
 
-But this is not sufficient, the server application also needs just the certificate (with public key)
+This is not sufficient, the server application also needs just the certificate (with public key)
 to be able to validate the client certificate.
 To achieve this we also need to configure a trust keystore for Spring Boot. 
 You must not use the keystore we just created because the server should not get access to the private key.
 
-Instead we have to create another keystore using the [Keystore Explorer](https://keystore-explorer.org/)
+Instead, we have to create another keystore using the [Keystore Explorer](https://keystore-explorer.org/)
 that only contains the certificate.
 
 But first we have to export the certificate from the existing keystore _myuser-client.p12_:
@@ -105,7 +105,7 @@ _src/main/resources/myuser.cer_.
 
 To use the client certificate on a command line client like _httpie_ we also need the private key 
 of the client certificate as well.  
-Therefore we also export the private key from the same keystore _myuser-client.p12_:
+Therefore, we also export the private key from the same keystore _myuser-client.p12_:
 
 * Right click on the single entry and select _Export/Export Private Key_, select _PKCS#8_ as type and then export the 
 key to _src/main/resources/myuser.pkcs8_.
@@ -187,7 +187,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                       EndpointRequest.to(InfoEndpoint.class))
                   .permitAll();
               ar.requestMatchers(EndpointRequest.toAnyEndpoint()).authenticated();
-              ar.anyRequest().fullyAuthenticated();
+              ar.anyRequest().authenticated();
             })
         .headers(h -> h.httpStrictTransportSecurity(HeadersConfigurer.HstsConfig::disable))
         .csrf(AbstractHttpConfigurer::disable)
@@ -208,10 +208,8 @@ The changes above
 local web applications not providing a Https connection)
 * configure how to get the principle from the client certificate using a regular expression for the common name (CN)
 
-
 In the referenced class _com.example.certificate.demo.security.DemoUserDetailsService_ we just map
-the user data from the certificate to local user entity (implementing the 
-interface _org.springframework.security.core.userdetails.UserDetails_). 
+the user data from the certificate to local user entity (implementing the interface _org.springframework.security.core.userdetails.UserDetails_). 
 
 ```java
 package com.example.certificate.demo.security;
@@ -283,16 +281,15 @@ That's it, the server implementation is complete.
 To build the server with [gradle](https://gradle.org/) just open a shell and perform the command ```gradlew clean build```.
 Please note that there this project also integrates the [OWASP Dependency Check](https://jeremylong.github.io/DependencyCheck/) 
 to scan 3rd party libraries for security vulnerabilities. To perform this check just 
-perform a ```gradlew dependencyCheckUpdate dependencyCheckAnalyze``` 
+perform a ```gradlew dependencyCheckUpdate dependencyCheckAnalyze```. 
 
-To start the application use [gradle](https://gradle.org/) as well by performing ```gradlew bootRun``` or start it using your Java IDE.
-
+To start the application use [gradle](https://gradle.org/) with the command ```gradlew bootRun``` or start it using your Java IDE.
 
 ### Client Test
 
 #### Web Browser
 
-To authenticate your web browser for our Spring Boot server application make sure that you have imported
+To authenticate your web browser for our Spring Boot server application make sure you have imported
 the file _myuser-client.p12_ into your the browsers certificate store.
 
 If you navigate your browser to ```https://localhost:8443/api``` then you first should see
@@ -301,7 +298,7 @@ you might have multiple client certificates installed. Make sure you select the 
 
 ![BrowserCertPopup](images/browser_cert_popup.png)
 
-If the authentication with the selected client certificate succeeds  the you should see the output
+If the authentication with the selected client certificate succeeds then you should see the output
 for the Rest API call (please also note that this is also served over a secure HTTPS connection validated by 
 our local CA root certificate).
 
@@ -309,11 +306,11 @@ our local CA root certificate).
 
 #### Postman
 
-If you are more into UI based tools then you can use [postman]() to send requests to the server.
+If you are more into UI based tools then you can use [postman](https://www.postman.com) to send requests to the server.
 Unfortunately postman does not work with self signed certificates with ssl validation turned on.
 So open the settings (Menu _File/Settings_), in the _General_ tab deactivate _SSL certificate verification_.
 
-To add the required files for the client certificate authentication just switch to the tab _Certificates_ in the settings dialog.
+To add the required files for the client certificate authentication just switch to the tab _Certificates_ in the _settings_ dialog.
 
 ![PostmanCert](images/postman_certificates.png)
 
@@ -324,11 +321,17 @@ Specify the following settings here:
 * KEY file: myuser.pkcs8
 * Passphrase: changeit   
 
+Important Notice: Due to a current issue in newer versions of postman you might get this error (see also [issue details](https://github.com/postmanlabs/postman-app-support/issues/8612)):
+
+```PKCS8 routines:OPENSSL_internal:UNKNOWN_ALGORITHM```
+
+To solve this, please use only postman versions up to version _7.25.0_.
+
 Now you can add a new request as shown in the next picture.
 
 ![PostmanRequest](images/postman_request.png)
 
-Click the _Send_ button and you should see the expected output.
+Click the _Send_ button to perform the request. Then you should see the expected output.
 
 #### Curl
 
@@ -390,34 +393,6 @@ This should lead to the following output:
 it works for myuser% 
 ```
 
-#### Httpie
-
-You can perform the same request to the server using this command with [httpie](https://httpie.org/):
-
-```shell script
-http --verbose --cert=./src/main/resources/myuser.cer --cert-key=./src/main/resources/myuser.pkcs8  https://localhost:8443/api
-```
-
-Unfortunately you cannot specify the passphrase for the private key (this is a limitation of the python lib used by _httpie_),
-so you will get a prompt. Just type _changeit_ and it should run fine.
-
-```shell script
-HTTP/1.1 200 
-Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-Connection: keep-alive
-Content-Length: 19
-Content-Type: text/plain;charset=UTF-8
-Date: Mon, 23 Mar 2020 20:21:03 GMT
-Expires: 0
-Keep-Alive: timeout=60
-Pragma: no-cache
-X-Content-Type-Options: nosniff
-X-Frame-Options: DENY
-X-XSS-Protection: 1; mode=block
-
-it works for myuser
-```
-
 ### Server-Side Output
 
 To see that the client certificate authentication is really happening on the server side
@@ -463,5 +438,3 @@ For further reference, please consider the following sections:
 * [SSL/TLS and PKI History](https://www.feistyduck.com/ssl-tls-and-pki-history/)
 * [RFC 8446: The Transport Layer Security (TLS) Protocol Version 1.3](https://tools.ietf.org/html/rfc8446)
 * [RFC 5280: Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile](https://tools.ietf.org/html/rfc5280)
-
-

@@ -36,7 +36,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                       EndpointRequest.to(InfoEndpoint.class))
                   .permitAll();
               ar.requestMatchers(EndpointRequest.toAnyEndpoint()).authenticated();
-              ar.anyRequest().fullyAuthenticated();
+              ar.anyRequest().authenticated();
             })
         .headers(h -> h.httpStrictTransportSecurity(HeadersConfigurer.HstsConfig::disable))
         .csrf(AbstractHttpConfigurer::disable)

@@ -1,3 +1,6 @@
+[![License](https://img.shields.io/badge/License-Apache%20License%202.0-brightgreen.svg)][1]
+![JavaCI](https://github.com/andifalk/client-certificate-demo/workflows/JavaCI/badge.svg)
+
 # Client Certificate Authentication with Spring Boot
 
 This repository contains a demo on how to implement mutual TLS (_MTLS_) using Spring Boot and Spring Security.
@@ -438,3 +441,9 @@ For further reference, please consider the following sections:
 * [SSL/TLS and PKI History](https://www.feistyduck.com/ssl-tls-and-pki-history/)
 * [RFC 8446: The Transport Layer Security (TLS) Protocol Version 1.3](https://tools.ietf.org/html/rfc8446)
 * [RFC 5280: Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile](https://tools.ietf.org/html/rfc5280)
+
+## License
+
+Apache 2.0 licensed
+
+[1]:http://www.apache.org/licenses/LICENSE-2.0.txt

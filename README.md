@@ -17,7 +17,7 @@ user specified as part of the client certificate.
 
 For this tutorial you need the following requirements:
 
-* Java JDK version 11 or newer. Just grab it from [AdoptJDK](https://adoptopenjdk.net/?variant=openjdk11&jvmVariant=hotspot).
+* Java JDK version 11 or newer.
 * Use a Java IDE of your choice (Just import the repository as a [gradle](https://gradle.org/) project)
 * [mkcert](https://mkcert.dev/) to create trusted certificates for localhost. Please follow 
   the [installation instructions](https://github.com/FiloSottile/mkcert#installation) to set this up
@@ -52,7 +52,7 @@ The local CA is now installed in Java's trust store! ☕️
 
 ## Setup HTTPS (SSL/TLS) for the application
 
-At first you need a valid trusted server certificate.  
+At first, you need a valid trusted server certificate.  
 To create a keystore containing the certificate with private/public key pair 
 open a command line terminal then navigate to the subdirectory _src/main/resources_ of this project 
 and use the following command.
@@ -75,7 +75,7 @@ server.ssl.key-password=changeit
 ```
 
 
-## Setup the client certificate
+## Set up the client certificate
 
 First we need of course again a valid trusted client certificate to authenticate 
 our client at the server.
@@ -101,7 +101,7 @@ that only contains the certificate.
 But first we have to export the certificate from the existing keystore _myuser-client.p12_:
 
 1. Open keystore with the Keystore Explorer. Select _myuser-client.p12_ in file dialog.
-2. Then right click on the single entry and select _Export/Export certificate chain_ and then export the certificate to
+2. Then right-click on the single entry and select _Export/Export certificate chain_ and then export the certificate to
 _src/main/resources/myuser.cer_.
    
 ![CertExport](images/cert_export.png)
@@ -110,14 +110,14 @@ To use the client certificate on a command line client like _httpie_ we also nee
 of the client certificate as well.  
 Therefore, we also export the private key from the same keystore _myuser-client.p12_:
 
-* Right click on the single entry and select _Export/Export Private Key_, select _PKCS#8_ as type and then export the 
+* Right-click on the single entry and select _Export/Export Private Key_, select _PKCS#8_ as type and then export the 
 key to _src/main/resources/myuser.pkcs8_.
 
 ![PrivateKeyExport](images/keystore_explorer_export_private_key.png)
 
-## Setup the server trust store
+## Set up the server trust store
 
-Also the server side has to trust the client certificate. To achieve this we need to setup a 
+Also, the server side has to trust the client certificate. To achieve this we need to set up a 
 _trust store_ for our server containing the client certificate together with the public key
 to validate the client certificate specified with the client requests.
 
@@ -126,11 +126,10 @@ So we will now import the previously exported _myuser.cer_ certificate into a ne
 1. Open the explorer and then create a new keystore using the menu _File/New_. 
 2. Then chose _PKCS#12_ as type
 3. Now select the menu _Tools/Import Trusted Certificate_
-4. Select the exported _myuser.cer_ file from previous section
+4. Select the exported _myuser.cer_ file from previous section, use _myuser_ as alias.
 5. Save the keystore as _src/main/resources/myuser-trust.p12_ and use password _changeit_ when prompted for
 
-Make sure you __ONLY__ import the certificate (containing the public key), the private key __MUST__ remain 
-on the client side only. 
+Make sure you __ONLY__ import the certificate (containing the public key), the private key __MUST__ remain on the client side only. 
 
 Now let's use this new trust store:
 
@@ -282,9 +281,6 @@ public class DemoRestController {
 That's it, the server implementation is complete.
 
 To build the server with [gradle](https://gradle.org/) just open a shell and perform the command ```gradlew clean build```.
-Please note that there this project also integrates the [OWASP Dependency Check](https://jeremylong.github.io/DependencyCheck/) 
-to scan 3rd party libraries for security vulnerabilities. To perform this check just 
-perform a ```gradlew dependencyCheckUpdate dependencyCheckAnalyze```. 
 
 To start the application use [gradle](https://gradle.org/) with the command ```gradlew bootRun``` or start it using your Java IDE.
 
@@ -293,7 +289,7 @@ To start the application use [gradle](https://gradle.org/) with the command ```g
 #### Web Browser
 
 To authenticate your web browser for our Spring Boot server application make sure you have imported
-the file _myuser-client.p12_ into your the browsers certificate store.
+the file _myuser-client.p12_ into your browser's certificate store.
 
 If you navigate your browser to ```https://localhost:8443/api``` then you first should see
 a popup window requesting a client certificate. Depending on your browser configuration
@@ -301,16 +297,14 @@ you might have multiple client certificates installed. Make sure you select the 
 
 ![BrowserCertPopup](images/browser_cert_popup.png)
 
-If the authentication with the selected client certificate succeeds then you should see the output
-for the Rest API call (please also note that this is also served over a secure HTTPS connection validated by 
-our local CA root certificate).
+If the authentication with the selected client certificate succeeds then you should see the output for the Rest API call (please also note that this is also served over a secure HTTPS connection validated by our local CA root certificate).
 
 ![BrowserItWorks](images/browser_it_works.png)
 
 #### Postman
 
 If you are more into UI based tools then you can use [postman](https://www.postman.com) to send requests to the server.
-Unfortunately postman does not work with self signed certificates with ssl validation turned on.
+Unfortunately postman does not work with self-signed certificates with ssl validation turned on.
 So open the settings (Menu _File/Settings_), in the _General_ tab deactivate _SSL certificate verification_.
 
 To add the required files for the client certificate authentication just switch to the tab _Certificates_ in the _settings_ dialog.
@@ -320,15 +314,8 @@ To add the required files for the client certificate authentication just switch 
 Specify the following settings here:
 
 * Host: localhost:8443
-* CRT file: myuser.cer
-* KEY file: myuser.pkcs8
+* PFX file: myuser-client.p12
 * Passphrase: changeit   
-
-Important Notice: Due to a current issue in newer versions of postman you might get this error (see also [issue details](https://github.com/postmanlabs/postman-app-support/issues/8612)):
-
-```PKCS8 routines:OPENSSL_internal:UNKNOWN_ALGORITHM```
-
-To solve this, please use only postman versions up to version _7.25.0_.
 
 Now you can add a new request as shown in the next picture.
 
@@ -341,12 +328,10 @@ Click the _Send_ button to perform the request. Then you should see the expected
 [Curl](https://curl.haxx.se/) can be configured to connect via a valid secure HTTPS connection and also
 authenticating using the client certificate.
 
-Before trying this please make sure that you have imported the CA certificate into the CA store of your operating system
-using _mkcert_.
+Before trying this please make sure that you have imported the CA certificate into the CA store of your operating system using _mkcert_.
 
 The most easy way for curl to use client certificates is to specify a keystore stored in _PKCS #12_ format.
-This way you can hand over the certificate together with the private key to curl at once. In addition to this you need
-to specify the password to access the keystore and the private key.
+This way you can hand over the certificate together with the private key to curl at once. In addition to this you need to specify the password to access the keystore and the private key.
 
 Check out this command for performing access via _curl_:  
 

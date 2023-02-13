@@ -1,19 +1,15 @@
 plugins {
-    id 'org.springframework.boot' version '2.4.0'
-    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'org.springframework.boot' version '2.7.8'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
     id 'java'
-    id 'org.owasp.dependencycheck' version '6.0.3'
 }
 
 group = 'com.example'
 version = '1.0.0-SNAPSHOT'
 sourceCompatibility = '11'
 
-configurations {
-    developmentOnly
-    runtimeClasspath {
-        extendsFrom developmentOnly
-    }
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
 repositories {
@@ -26,27 +22,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-    }
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation 'org.springframework.security:spring-security-test'
-}
-
-test {
-    useJUnitPlatform()
-}
-
-dependencyCheck {
-    analyzedTypes = ['jar']
-    failBuildOnCVSS=8
-    format='ALL'
-    suppressionFile=file("$projectDir/dependency-check-suppressions.xml")
-    analyzers {
-        experimentalEnabled = false
-        assemblyEnabled = false
-        nuspecEnabled = false
-        nodeEnabled = false
-        nodeAuditEnabled = false
-        nexusEnabled = false
-    }
 }
